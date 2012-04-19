@@ -102,8 +102,9 @@ class StubPromise(Promise):
 
 
 class StubUrlFetcher(UrlFetcher):
-    def __init__(self, stub_map):
+    def __init__(self, stub_map, fallback=False):
         self.stub_map = stub_map
+        self.fallback = fallback
 
     def _fetch(self, context):
         url = context['url']
@@ -112,5 +113,7 @@ class StubUrlFetcher(UrlFetcher):
             if re.match(pattern, url):
                 return StubPromise(stub, context)
 
-        raise KeyError(url)
+        if self.fallback:
+            return super(StubUrlFetcher, self)._fetch(context)
 
+        raise KeyError(url)
